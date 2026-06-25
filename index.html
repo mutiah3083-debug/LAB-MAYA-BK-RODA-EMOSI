@@ -1,0 +1,1175 @@
+<!doctype html>
+<html lang="id"><head><script src="/_sdk/telemetry_sdk.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Maya Roda Emosi</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/editing_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=Fraunces:opsz,wght@9..144,600;9..144,700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --ink:#0c2230;
+      --deep:#09202d;
+      --panel:#102f3f;
+      --panel-soft:#163d4f;
+      --mint:#8de7d1;
+      --cream:#fff5dd;
+      --coral:#ff8a7a;
+      --yellow:#ffd166;
+      --blue:#7cc7ff;
+      --violet:#bca8ff;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden}
+    body{
+      font-family:'DM Sans',sans-serif;
+      color:#f7fbf7;
+    }
+    /* Splash screen styles */
+    .splash-overlay{
+      position:fixed;inset:0;z-index:9999;
+      background:linear-gradient(135deg,#081923 0%,#0b2635 100%);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .splash-container{
+      position:relative;width:100%;height:100%;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      animation:splashFade 0.4s ease-out both;
+    }
+    @keyframes splashFade{from{opacity:0}to{opacity:1}}
+    .splash-image{
+      max-width:90%;max-height:70%;object-fit:contain;
+      animation:splashImageZoom 0.5s ease-out both;
+    }
+    @keyframes splashImageZoom{from{transform:scale(0.95);opacity:0}to{transform:scale(1);opacity:1}}
+    .splash-overlay-bottom{
+      position:absolute;bottom:60px;width:100%;
+      display:flex;flex-direction:column;align-items:center;gap:20px;
+    }
+    .splash-loading{
+      display:flex;flex-direction:column;align-items:center;gap:12px;
+      animation:fadeInUp 0.5s ease-out 0.3s both;
+    }
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .spinner{
+      width:40px;height:40px;
+      border:3px solid rgba(141,231,209,0.2);
+      border-top:3px solid #8de7d1;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .splash-btn{
+      padding:12px 32px;
+      border-radius:999px;
+      font-weight:700;
+      font-size:16px;
+      border:none;
+      cursor:pointer;
+      transition:all 0.3s ease;
+      animation:fadeInUp 0.5s ease-out 0.5s both;
+    }
+    .splash-btn:hover:not(.hidden){
+      transform:scale(1.08);
+    }
+    .splash-btn:focus-visible{
+      outline:3px solid #fff0a8;
+      outline-offset:3px;
+    }
+    .splash-btn.hidden{
+      display:none;
+    }
+    .loading-text{
+      font-size:14px;
+      color:#cbdadd;
+      letter-spacing:0.5px;
+    }
+    .app-shell{
+      width:100%;
+      min-height:calc(100 * min(var(--vh, 1vh), 1vh));
+      height:calc(100 * min(var(--vh, 1vh), 1vh));
+      background:
+        radial-gradient(circle at 15% 10%, rgba(141,231,209,.16), transparent 22%),
+        radial-gradient(circle at 85% 85%, rgba(255,138,122,.12), transparent 20%),
+        linear-gradient(135deg,#081923 0%,#0b2635 100%);
+      position:relative;
+      overflow:hidden;
+    }
+    .app-shell:before{
+      content:"";
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+      background-size:36px 36px;
+      opacity:.25;
+      pointer-events:none;
+    }
+    .glass{
+      background:rgba(15,47,63,.84);
+      border:1px solid rgba(255,255,255,.09);
+      box-shadow:0 18px 50px rgba(0,0,0,.24);
+      backdrop-filter:blur(14px);
+    }
+    .title-font{font-family:'Fraunces',serif}
+    .nav-btn{
+      transition:.25s ease;
+      border:1px solid transparent;
+    }
+    .nav-btn.active{
+      background:linear-gradient(135deg,rgba(141,231,209,.2),rgba(141,231,209,.06));
+      border-color:rgba(141,231,209,.45);
+      color:#eafff9;
+      transform:translateX(4px);
+    }
+    .nav-btn:hover{background:rgba(255,255,255,.06)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+    .emotion-wheel{
+      width:min(35vw,430px);
+      aspect-ratio:1/1;
+      border-radius:50%;
+      position:relative;
+      background:
+        radial-gradient(circle at center, #12384b 0 19%, transparent 20%),
+        conic-gradient(
+          #f87777 0deg 60deg,
+          #ffb35c 60deg 120deg,
+          #f4db6d 120deg 180deg,
+          #79d99a 180deg 240deg,
+          #77b7f8 240deg 300deg,
+          #b396f6 300deg 360deg
+        );
+      box-shadow:0 0 0 12px rgba(255,255,255,.04), 0 24px 45px rgba(0,0,0,.28);
+    }
+    .emotion-wheel:after{
+      content:"";
+      position:absolute;inset:18%;
+      border-radius:50%;
+      background:#123548;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+    }
+    .center-core{
+      position:absolute;inset:34%;
+      border-radius:50%;
+      background:linear-gradient(145deg,#12394d,#0f2b3a);
+      z-index:2;
+      display:flex;align-items:center;justify-content:center;text-align:center;
+      border:1px solid rgba(255,255,255,.1);
+      box-shadow:0 12px 25px rgba(0,0,0,.2);
+    }
+    .emotion-chip{
+      position:absolute;
+      z-index:3;
+      border:none;
+      color:#0a2533;
+      font-weight:700;
+      font-size:13px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:#fffdf7;
+      box-shadow:0 6px 14px rgba(0,0,0,.2);
+      transition:.2s ease;
+      white-space:nowrap;
+    }
+    .emotion-chip:hover,.emotion-chip.selected{
+      transform:scale(1.08);
+      box-shadow:0 0 0 4px rgba(255,255,255,.18),0 8px 18px rgba(0,0,0,.22);
+    }
+    .emotion-chip:focus-visible,.nav-btn:focus-visible,.action-btn:focus-visible{
+      outline:3px solid #fff0a8;
+      outline-offset:3px;
+    }
+    .chip-joy{top:6%;left:50%;transform:translateX(-50%)}
+    .chip-love{top:23%;right:-1%}
+    .chip-calm{bottom:22%;right:-1%}
+    .chip-sad{bottom:5%;left:50%;transform:translateX(-50%)}
+    .chip-fear{bottom:22%;left:-3%}
+    .chip-angry{top:23%;left:-3%}
+    .chip-joy.selected{transform:translateX(-50%) scale(1.08)}
+    .chip-sad.selected{transform:translateX(-50%) scale(1.08)}
+    .stat-bar{
+      height:8px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden
+    }
+    .stat-fill{
+      width:42%;height:100%;border-radius:999px;background:linear-gradient(90deg,#8de7d1,#ffd166);
+      transition:width .3s ease;
+    }
+    .step-dot{
+      width:34px;height:34px;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      background:#8de7d1;color:#08202d;font-weight:700;
+      flex:0 0 auto;
+    }
+    .mini-card{
+      background:rgba(255,255,255,.055);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .fade-in{animation:fadeIn .35s ease both}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    @media (max-width: 900px){
+      .emotion-wheel{width:min(42vw,360px)}
+      .sidebar-label{display:none}
+    }
+    @keyframes fadeOut{from{opacity:1}to{opacity:0}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/resizing_sdk.js" type="text/javascript"></script>
+ </head>
+ <body data-template-id="__page-root" style="background: linear-gradient(135deg, rgb(8, 25, 35), rgb(11, 38, 53));">
+  <div id="splashScreen" class="splash-overlay">
+   <div class="splash-container">
+    <img data-template-id="splash-image" loading="lazy" class="canva-image splash-image" alt="Lab Virtual Roda Emosi with two students and emotion wheel for guidance counseling" src="canva://MAHNHQZpyko/1">
+    <div class="splash-overlay-bottom">
+     <div class="splash-loading" id="loadingIndicator">
+      <div class="spinner"></div>
+      <p data-template-id="loading-text" class="canva-text" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 14px;">Memuat lab virtual...</p>
+     </div><button id="startBtn" data-template-id="start-button" class="canva-button splash-btn hidden" style="background: rgb(141, 231, 209); color: rgb(8, 32, 45); font-weight: 700; font-style: normal; font-size: 16px;">Mulai Sekarang</button>
+    </div>
+   </div>
+  </div>
+  <div class="app-shell p-5">
+   <div class="relative z-10 h-full flex flex-col">
+    <header class="flex items-center justify-between pb-4">
+     <div class="flex items-center gap-4">
+      <div data-template-id="brand-badge" class="canva-tag px-3 py-1 rounded-full text-xs font-bold tracking-[0.22em] uppercase" style="background: rgb(22, 61, 79); color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">LAB MAYA BK</div>
+      <div>
+       <h1 data-template-id="app-title" class="canva-text title-font leading-tight" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 32px;">Roda Emosi</h1>
+       <p data-template-id="app-subtitle" class="canva-text text-sm opacity-80 mt-1" style="color: rgb(199, 216, 221); font-weight: 400; font-style: normal; font-size: 14px;">Kenali, pahami, dan kelola perasaanmu dengan lebih sadar.</p>
+      </div>
+     </div>
+     <div class="flex items-center gap-2"><button id="resetBtn" data-template-id="reset-button" class="canva-button action-btn flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm" style="background: rgb(141, 231, 209); color: rgb(10, 36, 49); font-weight: 700; font-style: normal; font-size: 14px;">Reset</button> <button id="backToSplashBtn" data-template-id="back-to-splash-button" class="canva-button action-btn flex items-center gap-2 px-4 py-2 rounded-full font-semibold text-sm" style="background: rgb(255, 138, 122); color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 14px;">Kembali ke Cover</button>
+     </div>
+    </header>
+    <main class="flex-1 grid grid-cols-[92px_1fr] gap-4 min-h-0">
+     <nav data-template-id="sidebar-panel" class="canva-panel glass rounded-[24px] p-3 flex flex-col justify-between" style="background: rgba(15, 47, 63, 0.84);">
+      <div class="space-y-2"><button class="nav-btn active w-full rounded-2xl px-2 py-3 flex flex-col items-center gap-1 text-xs" data-tab="teori" aria-label="Buka tab teori"> <i data-lucide="book-open" class="w-5 h-5"></i> <span data-template-id="tab-teori" class="canva-text sidebar-label" style="color: rgb(232, 245, 242); font-weight: 600; font-style: normal; font-size: 11px;">Teori</span> </button> <button class="nav-btn w-full rounded-2xl px-2 py-3 flex flex-col items-center gap-1 text-xs" data-tab="prosedur" aria-label="Buka tab prosedur"> <i data-lucide="list-checks" class="w-5 h-5"></i> <span data-template-id="tab-prosedur" class="canva-text sidebar-label" style="color: rgb(232, 245, 242); font-weight: 600; font-style: normal; font-size: 11px;">Prosedur</span> </button> <button class="nav-btn w-full rounded-2xl px-2 py-3 flex flex-col items-center gap-1 text-xs" data-tab="simulasi" aria-label="Buka tab simulasi"> <i data-lucide="circle-dot" class="w-5 h-5"></i> <span data-template-id="tab-simulasi" class="canva-text sidebar-label" style="color: rgb(232, 245, 242); font-weight: 600; font-style: normal; font-size: 11px;">Simulasi</span> </button> <button class="nav-btn w-full rounded-2xl px-2 py-3 flex flex-col items-center gap-1 text-xs" data-tab="permainan" aria-label="Buka tab permainan"> <i data-lucide="gamepad-2" class="w-5 h-5"></i> <span data-template-id="tab-permainan" class="canva-text sidebar-label" style="color: rgb(232, 245, 242); font-weight: 600; font-style: normal; font-size: 11px;">Permainan</span> </button> <button class="nav-btn w-full rounded-2xl px-2 py-3 flex flex-col items-center gap-1 text-xs" data-tab="lkpd" aria-label="Buka tab LKPD"> <i data-lucide="clipboard-pen-line" class="w-5 h-5"></i> <span data-template-id="tab-lkpd" class="canva-text sidebar-label" style="color: rgb(232, 245, 242); font-weight: 600; font-style: normal; font-size: 11px;">LKPD</span> </button> <button class="nav-btn w-full rounded-2xl px-2 py-3 flex flex-col items-center gap-1 text-xs" data-tab="evaluasi" aria-label="Buka tab evaluasi"> <i data-lucide="clipboard-check" class="w-5 h-5"></i> <span data-template-id="tab-evaluasi" class="canva-text sidebar-label" style="color: rgb(232, 245, 242); font-weight: 600; font-style: normal; font-size: 11px;">Evaluasi</span> </button> <button class="nav-btn w-full rounded-2xl px-2 py-3 flex flex-col items-center gap-1 text-xs" data-tab="pengembang" aria-label="Buka tab pengembang"> <i data-lucide="user-round" class="w-5 h-5"></i> <span data-template-id="tab-pengembang" class="canva-text sidebar-label" style="color: rgb(232, 245, 242); font-weight: 600; font-style: normal; font-size: 11px;">Pengembang</span> </button>
+      </div>
+      <div class="flex justify-center pb-1 opacity-70"><i data-lucide="sparkles" class="w-5 h-5 text-[#8de7d1]"></i>
+      </div>
+     </nav>
+     <section data-template-id="main-panel" class="canva-panel glass rounded-[28px] p-5 overflow-hidden" style="background: rgba(15, 47, 63, 0.84);"><!-- TEORI -->
+      <section id="teori" class="tab-panel active h-full fade-in">
+       <div class="grid grid-cols-[1.05fr_.95fr] gap-6 h-full">
+        <div class="flex flex-col justify-center">
+         <div data-template-id="teori-eyebrow" class="canva-text text-xs uppercase tracking-[0.25em] text-[#8de7d1] font-bold mb-3" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Dasar Pemahaman</div>
+         <h2 data-template-id="teori-title" class="canva-text title-font leading-tight max-w-2xl" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 24px;">Emosi bukan untuk dihindari, tetapi untuk dipahami.</h2>
+         <p data-template-id="teori-desc" class="canva-text mt-4 text-[15px] leading-7 text-slate-200 max-w-xl" style="color: rgb(216, 228, 231); font-weight: 400; font-style: normal; font-size: 15px;">Roda emosi membantu kita mengenali apa yang sedang dirasakan. Saat emosi dapat diberi nama dengan tepat, kita akan lebih mudah memahami kebutuhan diri dan memilih respon yang sehat.</p>
+         <div class="mt-6 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+          <div class="flex items-start gap-3">
+           <div class="w-9 h-9 rounded-full bg-[#8de7d1] text-[#08202d] flex items-center justify-center"><i data-lucide="lightbulb" class="w-5 h-5"></i>
+           </div>
+           <div>
+            <h3 data-template-id="teori-note-title" class="canva-text font-semibold" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 15px;">Mengapa penting?</h3>
+            <p data-template-id="teori-note-text" class="canva-text text-sm text-slate-300 mt-1 leading-6" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Mengenali emosi adalah langkah awal untuk mengambil keputusan yang lebih bijak.</p>
+           </div>
+          </div>
+         </div>
+        </div>
+        <div class="grid grid-rows-3 gap-3 my-auto">
+         <article data-template-id="theory-card-1" class="canva-card mini-card rounded-2xl p-4 flex items-center gap-4" style="background: rgba(255, 255, 255, 0.055);">
+          <div class="w-11 h-11 rounded-2xl bg-[#ff8a7a] flex items-center justify-center text-[#10202a]"><i data-lucide="scan-face" class="w-5 h-5"></i>
+          </div>
+          <div>
+           <h3 data-template-id="theory-card-1-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Mengenali</h3>
+           <p data-template-id="theory-card-1-text" class="canva-text text-sm text-slate-300 mt-1" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Sadari sinyal dari pikiran dan tubuhmu.</p>
+          </div>
+         </article>
+         <article data-template-id="theory-card-2" class="canva-card mini-card rounded-2xl p-4 flex items-center gap-4" style="background: rgba(255, 255, 255, 0.055);">
+          <div class="w-11 h-11 rounded-2xl bg-[#ffd166] flex items-center justify-center text-[#10202a]"><i data-lucide="message-circle-heart" class="w-5 h-5"></i>
+          </div>
+          <div>
+           <h3 data-template-id="theory-card-2-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Menamai</h3>
+           <p data-template-id="theory-card-2-text" class="canva-text text-sm text-slate-300 mt-1" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Temukan kata yang paling sesuai untuk perasaanmu.</p>
+          </div>
+         </article>
+         <article data-template-id="theory-card-3" class="canva-card mini-card rounded-2xl p-4 flex items-center gap-4" style="background: rgba(255, 255, 255, 0.055);">
+          <div class="w-11 h-11 rounded-2xl bg-[#8de7d1] flex items-center justify-center text-[#10202a]"><i data-lucide="leaf" class="w-5 h-5"></i>
+          </div>
+          <div>
+           <h3 data-template-id="theory-card-3-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Mengelola</h3>
+           <p data-template-id="theory-card-3-text" class="canva-text text-sm text-slate-300 mt-1" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Pilih respon yang aman dan menenangkan.</p>
+          </div>
+         </article>
+        </div>
+       </div>
+      </section><!-- PROSEDUR -->
+      <section id="prosedur" class="tab-panel h-full fade-in">
+       <div class="h-full flex flex-col">
+        <div class="mb-5">
+         <div data-template-id="prosedur-eyebrow" class="canva-text text-xs uppercase tracking-[0.25em] text-[#8de7d1] font-bold mb-2" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Langkah Kegiatan</div>
+         <h2 data-template-id="prosedur-title" class="canva-text title-font" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 24px;">Ikuti alur sederhana ini.</h2>
+         <p data-template-id="prosedur-desc" class="canva-text text-sm text-slate-300 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 14px;">Gunakan lab ini dengan tenang dan jujur terhadap perasaanmu sendiri.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 flex-1">
+         <article data-template-id="step-card-1" class="canva-card mini-card rounded-3xl p-5 flex gap-4" style="background: rgba(255, 255, 255, 0.055);">
+          <div class="step-dot">
+           1
+          </div>
+          <div>
+           <h3 data-template-id="step-1-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Amati dirimu</h3>
+           <p data-template-id="step-1-text" class="canva-text text-sm text-slate-300 leading-6 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Perhatikan apa yang sedang kamu rasakan saat ini.</p>
+          </div>
+         </article>
+         <article data-template-id="step-card-2" class="canva-card mini-card rounded-3xl p-5 flex gap-4" style="background: rgba(255, 255, 255, 0.055);">
+          <div class="step-dot">
+           2
+          </div>
+          <div>
+           <h3 data-template-id="step-2-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Pilih emosi</h3>
+           <p data-template-id="step-2-text" class="canva-text text-sm text-slate-300 leading-6 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Klik emosi yang paling mendekati keadaanmu.</p>
+          </div>
+         </article>
+         <article data-template-id="step-card-3" class="canva-card mini-card rounded-3xl p-5 flex gap-4" style="background: rgba(255, 255, 255, 0.055);">
+          <div class="step-dot">
+           3
+          </div>
+          <div>
+           <h3 data-template-id="step-3-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Baca maknanya</h3>
+           <p data-template-id="step-3-text" class="canva-text text-sm text-slate-300 leading-6 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Pahami pesan yang mungkin sedang disampaikan emosimu.</p>
+          </div>
+         </article>
+         <article data-template-id="step-card-4" class="canva-card mini-card rounded-3xl p-5 flex gap-4" style="background: rgba(255, 255, 255, 0.055);">
+          <div class="step-dot">
+           4
+          </div>
+          <div>
+           <h3 data-template-id="step-4-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Tuliskan refleksi</h3>
+           <p data-template-id="step-4-text" class="canva-text text-sm text-slate-300 leading-6 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 13px;">Catat pengalamanmu pada LKPD secara singkat.</p>
+          </div>
+         </article>
+        </div>
+       </div>
+      </section><!-- SIMULASI -->
+      <section id="simulasi" class="tab-panel h-full fade-in">
+       <div class="grid grid-cols-[1.15fr_.85fr] gap-6 h-full">
+        <div class="flex flex-col">
+         <div class="flex items-start justify-between">
+          <div>
+           <div data-template-id="simulasi-eyebrow" class="canva-text text-xs uppercase tracking-[0.25em] text-[#8de7d1] font-bold mb-2" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Eksplorasi Interaktif</div>
+           <h2 data-template-id="simulasi-title" class="canva-text title-font" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 24px;">Apa yang kamu rasakan hari ini?</h2>
+           <p data-template-id="simulasi-desc" class="canva-text text-sm text-slate-300 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 14px;">Sentuh salah satu emosi pada roda untuk memulai refleksi.</p>
+          </div><button id="audioBtn" data-template-id="audio-button" class="canva-button action-btn rounded-full px-4 py-2 flex items-center gap-2 text-sm font-semibold" style="background: rgb(36, 72, 90); color: rgb(234, 255, 249); font-weight: 700; font-style: normal; font-size: 13px;">Bunyi Panduan</button>
+         </div>
+         <div class="flex-1 flex items-center justify-center">
+          <div class="emotion-wheel">
+           <div class="center-core">
+            <div>
+             <div class="text-[10px] uppercase tracking-[0.22em] text-[#8de7d1] mb-1">
+              RODA
+             </div>
+             <div class="title-font text-xl">
+              EMOSI
+             </div>
+            </div>
+           </div><button class="emotion-chip chip-joy" data-emotion="Bahagia">Bahagia</button> <button class="emotion-chip chip-love" data-emotion="Sayang">Sayang</button> <button class="emotion-chip chip-calm" data-emotion="Tenang">Tenang</button> <button class="emotion-chip chip-sad" data-emotion="Sedih">Sedih</button> <button class="emotion-chip chip-fear" data-emotion="Takut">Takut</button> <button class="emotion-chip chip-angry" data-emotion="Marah">Marah</button>
+          </div>
+         </div>
+        </div>
+        <aside data-template-id="result-panel" class="canva-panel rounded-3xl bg-white/[0.055] border border-white/10 p-5 flex flex-col" style="background: rgba(255, 255, 255, 0.055);">
+         <div class="flex items-center justify-between">
+          <div>
+           <p data-template-id="result-eyebrow" class="canva-text text-[11px] uppercase tracking-[0.22em] text-[#8de7d1] font-bold" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Emosi Terpilih</p>
+           <h3 id="selectedEmotion" class="title-font text-3xl mt-2">Belum dipilih</h3>
+          </div>
+          <div id="emotionIcon" class="w-12 h-12 rounded-2xl bg-[#24485a] flex items-center justify-center"><i data-lucide="circle-help" class="w-6 h-6"></i>
+          </div>
+         </div>
+         <div class="mt-5">
+          <div class="flex items-center justify-between text-xs text-slate-300 mb-2"><span data-template-id="intensity-label" class="canva-text" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 12px;">Intensitas</span> <span id="intensityText">-</span>
+          </div>
+          <div class="stat-bar">
+           <div id="intensityBar" class="stat-fill" style="width:0%"></div>
+          </div>
+         </div>
+         <div class="mt-5 rounded-2xl bg-black/10 border border-white/10 p-4">
+          <p data-template-id="meaning-label" class="canva-text text-xs uppercase tracking-[0.18em] text-[#ffd166] font-bold" style="color: rgb(255, 209, 102); font-weight: 700; font-style: normal; font-size: 11px;">Makna Emosi</p>
+          <p id="emotionMeaning" class="text-sm text-slate-200 leading-6 mt-2">Pilih salah satu emosi pada roda untuk melihat penjelasan singkat.</p>
+         </div>
+         <div class="mt-4 rounded-2xl bg-black/10 border border-white/10 p-4">
+          <p data-template-id="regulation-label" class="canva-text text-xs uppercase tracking-[0.18em] text-[#8de7d1] font-bold" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Langkah Sehat</p>
+          <p id="emotionTip" class="text-sm text-slate-200 leading-6 mt-2">Saran sederhana akan muncul di sini.</p>
+         </div>
+         <div class="mt-auto pt-4">
+          <p data-template-id="reflection-prompt" class="canva-text text-xs text-slate-300 italic leading-5" style="color: rgb(203, 218, 221); font-weight: 400; font-style: italic; font-size: 12px;">Tidak ada emosi yang salah. Semua emosi membawa pesan yang perlu didengar.</p>
+         </div>
+        </aside>
+       </div>
+      </section><!-- PERMAINAN -->
+      <section id="permainan" class="tab-panel h-full fade-in">
+       <div class="h-full flex flex-col">
+        <div class="mb-4">
+         <div data-template-id="permainan-eyebrow" class="canva-text text-xs uppercase tracking-[0.25em] text-[#8de7d1] font-bold mb-2" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Permainan Interaktif</div>
+         <h2 data-template-id="permainan-title" class="canva-text title-font" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 24px;">Pasangkan emosi yang sama.</h2>
+         <p data-template-id="permainan-desc" class="canva-text text-sm text-slate-300 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 14px;">Mainkan permainan memory matching untuk mengasah pengenalan emosi. Temukan pasangan yang sama sebelum waktu habis!</p>
+        </div>
+        <div class="flex-1 flex flex-col gap-4">
+         <div id="gameBoard" class="grid grid-cols-4 gap-3 flex-1">
+          <!-- Game cards will be populated by JS -->
+         </div>
+         <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+           <p data-template-id="game-score-label" class="canva-text text-sm font-semibold" style="color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 14px;">Pasangan yang ditemukan:</p>
+           <p id="gameScore" class="text-2xl font-bold text-[#8de7d1]">0/6</p>
+          </div><button id="gameResetBtn" data-template-id="game-reset-button" class="canva-button action-btn rounded-full px-5 py-2 font-semibold flex items-center gap-2" style="background: rgb(141, 231, 209); color: rgb(8, 32, 45); font-weight: 700; font-style: normal; font-size: 14px;">Mulai Ulang</button>
+         </div>
+        </div>
+       </div>
+      </section><!-- LKPD -->
+      <section id="lkpd" class="tab-panel h-full fade-in">
+       <div class="grid grid-cols-[1fr_.85fr] gap-5 h-full">
+        <div class="flex flex-col">
+         <div class="mb-4">
+          <div data-template-id="lkpd-eyebrow" class="canva-text text-xs uppercase tracking-[0.25em] text-[#8de7d1] font-bold mb-2" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Lembar Kerja Peserta Didik</div>
+          <h2 data-template-id="lkpd-title" class="canva-text title-font" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 24px;">Tuliskan refleksimu.</h2>
+          <p data-template-id="lkpd-desc" class="canva-text text-sm text-slate-300 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 14px;">Gunakan kalimat sederhana dan jujur sesuai pengalamanmu.</p>
+         </div>
+         <form id="reflectionForm" class="space-y-4 flex-1">
+          <div><label data-template-id="name-label" for="studentName" class="canva-text block text-sm font-medium mb-2" style="color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 14px;">Namamu</label> <input id="studentName" type="text" class="w-full rounded-2xl bg-white/[0.07] border border-white/10 px-4 py-3 text-white outline-none focus:border-[#8de7d1]">
+          </div>
+          <div><label data-template-id="emotion-label" for="emotionSelect" class="canva-text block text-sm font-medium mb-2" style="color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 14px;">Emosi yang paling kamu rasakan</label> <select id="emotionSelect" class="w-full rounded-2xl bg-[#173748] border border-white/10 px-4 py-3 text-white outline-none focus:border-[#8de7d1]"> <option value="">Pilih emosi</option> <option>Bahagia</option> <option>Sayang</option> <option>Tenang</option> <option>Sedih</option> <option>Takut</option> <option>Marah</option> </select>
+          </div>
+          <div><label data-template-id="reflection-label" for="reflectionText" class="canva-text block text-sm font-medium mb-2" style="color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 14px;">Apa yang membuatmu merasa demikian?</label> <textarea id="reflectionText" rows="4" class="w-full resize-none rounded-2xl bg-white/[0.07] border border-white/10 px-4 py-3 text-white outline-none focus:border-[#8de7d1]"></textarea>
+          </div><button data-template-id="save-reflection-button" class="canva-button action-btn rounded-full px-5 py-3 font-semibold flex items-center gap-2" type="submit" style="background: rgb(141, 231, 209); color: rgb(8, 32, 45); font-weight: 700; font-style: normal; font-size: 14px;">Simpan Refleksi</button>
+         </form>
+        </div>
+        <aside data-template-id="summary-panel" class="canva-panel rounded-3xl border border-white/10 bg-white/[0.055] p-5 flex flex-col" style="background: rgba(255, 255, 255, 0.055);">
+         <div class="flex items-center gap-3 mb-4">
+          <div class="w-10 h-10 rounded-2xl bg-[#ffd166] text-[#0b2835] flex items-center justify-center"><i data-lucide="notebook-tabs" class="w-5 h-5"></i>
+          </div>
+          <div>
+           <p data-template-id="summary-eyebrow" class="canva-text text-[11px] uppercase tracking-[0.2em] text-[#8de7d1] font-bold" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Catatanmu</p>
+           <h3 data-template-id="summary-title" class="canva-text font-semibold" style="color: rgb(255, 255, 255); font-weight: 700; font-style: normal; font-size: 19px;">Ringkasan Refleksi</h3>
+          </div>
+         </div>
+         <div id="summaryEmpty" class="flex-1 flex items-center justify-center text-center text-slate-400 text-sm leading-6">
+          <p data-template-id="summary-empty" class="canva-text" style="color: rgb(184, 200, 204); font-weight: 400; font-style: normal; font-size: 13px;">Belum ada refleksi yang disimpan. Isi LKPD di sebelah kiri untuk melihat ringkasanmu.</p>
+         </div>
+         <div id="summaryContent" class="hidden text-sm leading-6 text-slate-200 space-y-4">
+          <div>
+           <p class="text-xs uppercase tracking-[0.16em] text-[#8de7d1]">Nama</p>
+           <p id="summaryName" class="mt-1 font-medium"></p>
+          </div>
+          <div>
+           <p class="text-xs uppercase tracking-[0.16em] text-[#8de7d1]">Emosi</p>
+           <p id="summaryEmotion" class="mt-1 font-medium"></p>
+          </div>
+          <div>
+           <p class="text-xs uppercase tracking-[0.16em] text-[#8de7d1]">Refleksi</p>
+           <p id="summaryReflection" class="mt-1"></p>
+          </div>
+         </div>
+        </aside>
+       </div>
+      </section><!-- EVALUASI -->
+      <section id="evaluasi" class="tab-panel h-full fade-in">
+       <div class="flex flex-col h-full">
+        <div class="mb-4">
+         <div data-template-id="evaluasi-eyebrow" class="canva-text text-xs uppercase tracking-[0.25em] text-[#8de7d1] font-bold mb-2" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Penilaian Pemahaman</div>
+         <h2 data-template-id="evaluasi-title" class="canva-text title-font" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 24px;">Uji pemahamanmu tentang emosi.</h2>
+         <p data-template-id="evaluasi-desc" class="canva-text text-sm text-slate-300 mt-2" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 14px;">Jawab 10 soal untuk melihat seberapa dalam pemahamanmu tentang emosi dan pengelolaannya. Setiap jawaban akan diikuti penjelasan.</p>
+        </div>
+        <div id="quizContainer" class="flex-1 overflow-y-auto space-y-4 pr-3">
+         <!-- Questions will be populated by JS -->
+        </div>
+        <div id="quizResultPanel" class="hidden mt-4 rounded-3xl border border-white/10 bg-white/[0.055] p-5 text-center">
+         <p data-template-id="quiz-result-label" class="canva-text text-xs uppercase tracking-[0.2em] text-[#8de7d1] font-bold mb-2" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Hasil Evaluasi</p>
+         <div id="quizScore" class="title-font text-4xl text-[#8de7d1] mb-2">
+          -
+         </div>
+         <p id="quizMessage" class="text-slate-200 text-sm leading-6"></p><button id="quizResetBtn" data-template-id="quiz-reset-button" class="canva-button action-btn rounded-full px-5 py-2 font-semibold mt-4 flex items-center justify-center gap-2 mx-auto" style="background: rgb(141, 231, 209); color: rgb(8, 32, 45); font-weight: 700; font-style: normal; font-size: 14px;">Kerjakan Ulang</button>
+        </div>
+       </div>
+      </section><!-- PENGEMBANG -->
+      <section id="pengembang" class="tab-panel h-full fade-in">
+       <div class="grid grid-cols-[.85fr_1.15fr] gap-6 h-full items-center">
+        <div class="relative flex flex-col items-center">
+         <div class="absolute -inset-3 rounded-[30px] bg-[#8de7d1]/15 blur-xl"></div><img data-template-id="developer-photo" loading="lazy" class="canva-image relative w-full h-[330px] object-cover rounded-[28px] border border-white/10" src="canva://MAHNHfSySg0/1" alt="Mutiah, S.Psi., Gr. - Guidance Counselor reading in library setting">
+         <div class="mt-6 text-center">
+          <h3 class="title-font text-2xl text-[#fff5dd] font-bold mb-1">Mutiah, S.Psi., Gr.</h3>
+          <p class="text-sm text-[#8de7d1] font-medium">Konselor BK &amp; Fasilitator</p>
+         </div>
+        </div>
+        <div>
+         <div data-template-id="developer-eyebrow" class="canva-text text-xs uppercase tracking-[0.25em] text-[#8de7d1] font-bold mb-3" style="color: rgb(141, 231, 209); font-weight: 700; font-style: normal; font-size: 11px;">Tentang Pengembang</div>
+         <h2 data-template-id="developer-title" class="canva-text title-font" style="color: rgb(255, 245, 221); font-weight: 700; font-style: normal; font-size: 24px;">Guru BK &amp; Fasilitator Belajar</h2>
+         <p data-template-id="developer-role" class="canva-text text-[#ffd166] mt-2 font-medium" style="color: rgb(255, 209, 102); font-weight: 600; font-style: normal; font-size: 15px;">Pendamping tumbuh kembang remaja</p>
+         <p data-template-id="developer-desc" class="canva-text text-slate-300 mt-5 leading-7" style="color: rgb(203, 218, 221); font-weight: 400; font-style: normal; font-size: 15px;">Lab maya ini dirancang untuk membantu siswa mengenali emosi secara lebih aman, ringan, dan menyenangkan. Harapannya, setiap siswa memiliki ruang untuk memahami dirinya sendiri dengan lebih baik.</p>
+         <div class="mt-6 rounded-3xl border border-white/10 bg-white/[0.05] p-5"><i data-lucide="quote" class="w-5 h-5 text-[#8de7d1] mb-3"></i>
+          <p data-template-id="developer-quote" class="canva-text title-font text-xl leading-8" style="color: rgb(255, 255, 255); font-weight: 600; font-style: normal; font-size: 21px;">“Mengenali perasaan adalah langkah kecil menuju keputusan yang lebih bijak.”</p>
+         </div>
+        </div>
+       </div>
+      </section>
+     </section>
+    </main>
+    <footer class="pt-3 flex items-center justify-between text-[11px] text-slate-400">
+     <p data-template-id="footer-left" class="canva-text" style="color: rgb(158, 179, 185); font-weight: 400; font-style: normal; font-size: 11px;">BK Digital • Refleksi Emosi untuk Remaja</p>
+     <p data-template-id="footer-right" class="canva-text" style="color: rgb(158, 179, 185); font-weight: 400; font-style: normal; font-size: 11px;">Belajar memahami diri, satu emosi pada satu waktu.</p>
+    </footer>
+   </div>
+  </div>
+  <script>
+    lucide.createIcons();
+
+    // Splash screen initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      const startBtn = document.getElementById('startBtn');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const splashScreen = document.getElementById('splashScreen');
+      const appShell = document.querySelector('.app-shell');
+      
+      // Simulate loading (show for 2.5 seconds)
+      setTimeout(() => {
+        loadingIndicator.classList.add('hidden');
+        startBtn.classList.remove('hidden');
+        
+        // Play sound on button appear
+        tone(523, 0.1);
+      }, 2500);
+      
+      startBtn.addEventListener('click', () => {
+        tone(659, 0.12);
+        splashScreen.style.animation = 'fadeOut 0.4s ease-out forwards';
+        appShell.style.animation = 'fadeIn 0.4s ease-out 0.1s forwards';
+        setTimeout(() => {
+          splashScreen.style.display = 'none';
+          appShell.style.display = 'flex';
+        }, 500);
+      });
+    });
+
+    const panels = document.querySelectorAll('.tab-panel');
+    const navButtons = document.querySelectorAll('.nav-btn');
+
+    function showTab(tabName){
+      panels.forEach(panel => panel.classList.toggle('active', panel.id === tabName));
+      navButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabName));
+    }
+
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tone(440, 0.08);
+        showTab(btn.dataset.tab);
+      });
+    });
+
+    const emotionData = {
+      "Bahagia": {
+        meaning:"Bahagia muncul saat kita mengalami hal yang menyenangkan, berhasil, atau merasa dihargai.",
+        tip:"Nikmati momen ini dan bagikan rasa syukurmu pada orang terdekat.",
+        intensity:"Tinggi",
+        width:"86%",
+        icon:"smile"
+      },
+      "Sayang": {
+        meaning:"Sayang hadir ketika kita merasa dekat, peduli, dan terhubung dengan seseorang.",
+        tip:"Tunjukkan perhatian lewat kata-kata baik atau tindakan kecil yang tulus.",
+        intensity:"Hangat",
+        width:"74%",
+        icon:"heart"
+      },
+      "Tenang": {
+        meaning:"Tenang adalah keadaan saat pikiran dan tubuh terasa lebih stabil serta nyaman.",
+        tip:"Pertahankan dengan bernapas perlahan dan menjaga ritme aktivitasmu.",
+        intensity:"Stabil",
+        width:"62%",
+        icon:"leaf"
+      },
+      "Sedih": {
+        meaning:"Sedih sering muncul saat kehilangan, kecewa, atau merasa kurang dipahami.",
+        tip:"Izinkan diri merasakan sedih, lalu ceritakan kepada orang yang kamu percaya.",
+        intensity:"Sedang",
+        width:"55%",
+        icon:"cloud-rain"
+      },
+      "Takut": {
+        meaning:"Takut adalah sinyal bahwa kita merasa terancam, khawatir, atau belum siap.",
+        tip:"Tarik napas dalam, kenali sumber takutmu, lalu ambil satu langkah kecil yang aman.",
+        intensity:"Waspada",
+        width:"68%",
+        icon:"shield-alert"
+      },
+      "Marah": {
+        meaning:"Marah muncul saat batas diri terasa dilanggar atau sesuatu berjalan tidak adil.",
+        tip:"Berhenti sejenak, tenangkan tubuh, lalu ungkapkan kebutuhanmu dengan jelas.",
+        intensity:"Kuat",
+        width:"78%",
+        icon:"flame"
+      }
+    };
+
+    const quizQuestions = [
+      {
+        id:1,
+        type:"pilihan-ganda",
+        question:"Menurut model psikologi emosi, berapa banyak emosi dasar yang universal di semua budaya?",
+        options:[
+          {text:"3 emosi dasar",correct:false,explanation:"Salah. Teori Paul Ekman mengidentifikasi lebih banyak emosi dasar yang universal."},
+          {text:"6 emosi dasar (senang, sedih, marah, takut, terkejut, jijik)",correct:true,explanation:"Benar! Paul Ekman menemukan 6 emosi dasar yang dikenal di seluruh budaya manusia."},
+          {text:"9 emosi dasar",correct:false,explanation:"Salah. Meskipun ada emosi lain, teori universal yang paling diterima adalah 6 emosi dasar."},
+          {text:"15 emosi dasar",correct:false,explanation:"Salah. Jumlah ini terlalu banyak untuk emosi dasar yang universal."}
+        ]
+      },
+      {
+        id:2,
+        type:"pilihan-ganda",
+        question:"Mengapa penting bagi remaja untuk belajar mengenali emosi mereka sendiri?",
+        options:[
+          {text:"Agar remaja tidak pernah mengalami emosi negatif",correct:false,explanation:"Salah. Emosi negatif adalah bagian normal kehidupan. Yang penting adalah mengerti dan mengelolanya dengan baik."},
+          {text:"Untuk membuat keputusan lebih bijak dan mengelola kesejahteraan mental",correct:true,explanation:"Benar. Mengenali emosi membantu remaja memahami kebutuhan mereka dan merespons situasi secara lebih sehat."},
+          {text:"Hanya untuk keperluan sekolah saja",correct:false,explanation:"Salah. Kemampuan mengenali emosi adalah keterampilan hidup yang sangat berharga."},
+          {text:"Untuk menunjukkan pada orang lain bahwa kita matang",correct:false,explanation:"Salah. Mengenali emosi adalah proses pribadi, bukan untuk perlombaan sosial."}
+        ]
+      },
+      {
+        id:3,
+        type:"pilihan-ganda",
+        question:"Apa perbedaan utama antara mengenali emosi dan menamai emosi?",
+        options:[
+          {text:"Tidak ada perbedaan, keduanya sama saja",correct:false,explanation:"Salah. Kedua proses ini berbeda: mengenali adalah mengamati, sementara menamai adalah memberi label."},
+          {text:"Mengenali adalah merasakan, menamai adalah menemukan kata yang tepat untuk perasaan itu",correct:true,explanation:"Benar! Mengenali berarti menjadi sadar akan sensasi fisik dan emosional. Menamai berarti memberikan label verbal yang akurat."},
+          {text:"Mengenali lebih sulit daripada menamai",correct:false,explanation:"Salah. Tingkat kesulitan berbeda untuk setiap orang tergantung pada pengalaman mereka."},
+          {text:"Hanya orang-orang tertentu yang bisa melakukan keduanya",correct:false,explanation:"Salah. Semua orang dapat belajar keterampilan ini dengan latihan."}
+        ]
+      },
+      {
+        id:4,
+        type:"menjodohkan",
+        question:"Pasangkan setiap emosi dengan deskripsi situasi yang memicunya:",
+        pairs:[
+          {emotion:"Bahagia",characteristic:"Mendapat nilai A di ujian atau berhasil mencapai tujuan",correct:"Bahagia"},
+          {emotion:"Sedih",characteristic:"Kehilangan orang atau hal yang berharga",correct:"Sedih"},
+          {emotion:"Marah",characteristic:"Merasa tidak dihargai atau batas pribadi dilanggar",correct:"Marah"},
+          {emotion:"Takut",characteristic:"Menghadapi sesuatu yang tidak diketahui atau berbahaya",correct:"Takut"},
+          {emotion:"Tenang",characteristic:"Berada di tempat aman dengan orang terkasih",correct:"Tenang"}
+        ]
+      },
+      {
+        id:5,
+        type:"menjodohkan",
+        question:"Cocokkan strategi regulasi emosi dengan situasi yang cocok:",
+        pairs:[
+          {step:"Bernapas dalam",description:"Saat merasa panik atau cemas",correct:"Bernapas dalam"},
+          {step:"Berbicara dengan orang terpercaya",description:"Saat merasa sedih atau sendirian",correct:"Berbicara dengan orang terpercaya"},
+          {step:"Aktivitas fisik",description:"Saat merasa kesal atau penuh energi negatif",correct:"Aktivitas fisik"},
+          {step:"Istirahat cukup",description:"Saat lelah dan emosi menjadi lebih sensitif",correct:"Istirahat cukup"},
+          {step:"Menulis atau menggambar",description:"Saat ingin mengekspresikan perasaan kompleks",correct:"Menulis atau menggambar"}
+        ]
+      },
+      {
+        id:6,
+        type:"menyeret",
+        question:"Urutkan proses pengelolaan emosi dari tahap pertama hingga akhir:",
+        items:[
+          {text:"Mengenali tanda fisik emosi (detak jantung, napas, tegang)",order:1,correct:1},
+          {text:"Menamai emosi dengan kata yang tepat dan jujur",order:2,correct:2},
+          {text:"Memahami pemicu atau penyebab emosi tersebut",order:3,correct:3},
+          {text:"Memilih strategi regulasi yang paling sesuai",order:4,correct:4},
+          {text:"Menerapkan strategi dan memantau perubahannya",order:5,correct:5}
+        ]
+      },
+      {
+        id:7,
+        type:"menyeret",
+        question:"Urutkan langkah-langkah aman untuk mengelola kemarahan yang meledak-ledak:",
+        items:[
+          {text:"Berhenti sejenak dan ciptakan jarak dari pemicu",order:1,correct:1},
+          {text:"Ambil napas dalam beberapa kali hingga tubuh lebih rileks",order:2,correct:2},
+          {text:"Lakukan aktivitas fisik ringan seperti jalan atau streching",order:3,correct:3},
+          {text:"Pikirkan ulang situasi dengan perspektif yang lebih luas",order:4,correct:4},
+          {text:"Komunikasikan kebutuhan atau keluh kesahmu dengan tenang",order:5,correct:5}
+        ]
+      },
+      {
+        id:8,
+        type:"isian",
+        question:"Ketika emosi kita diakui dan ______________ dengan cara yang sehat, kesejahteraan mental kita akan meningkat.",
+        hint:"(Mulai dengan huruf D)",
+        correctAnswer:"dikelola",
+        explanation:"Benar! Ketika emosi diakui dan dikelola dengan sehat, kita dapat mencapai keseimbangan emosional yang lebih baik dan membuat keputusan yang lebih bijak."
+      },
+      {
+        id:9,
+        type:"isian",
+        question:"Proses mengamati dan merasakan emosi tanpa langsung bereaksi disebut sebagai ______________ atau mindfulness.",
+        hint:"(Mulai dengan huruf K)",
+        correctAnswer:"kesadaran",
+        explanation:"Benar! Kesadaran atau mindfulness adalah kemampuan untuk mengobservasi emosi kita tanpa langsung bereaksi secara impulsif, yang memungkinkan kita untuk memilih respons yang lebih bijak."
+      },
+      {
+        id:10,
+        type:"isian",
+        question:"Salah satu manfaat merefleksikan emosi adalah kita dapat memahami ______________ diri sendiri dengan lebih dalam.",
+        hint:"(Mulai dengan huruf K)",
+        correctAnswer:"kebutuhan",
+        explanation:"Benar! Refleksi emosi membantu kita memahami kebutuhan diri sendiri—apakah kita butuh istirahat, dukungan, atau perubahan dalam hidup kita."
+      }
+    ];
+
+    function renderQuiz(){
+      const container = document.getElementById('quizContainer');
+      container.innerHTML = '';
+      quizQuestions.forEach((q, idx) => {
+        const div = document.createElement('div');
+        div.className = 'mini-card rounded-2xl p-5 space-y-3';
+        let content = `
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <p class="text-xs uppercase tracking-[0.2em] text-[#8de7d1] font-bold mb-2">Soal ${q.id}/10</p>
+              <h3 class="canva-text font-semibold text-white mb-4">${q.question}</h3>
+            </div>
+          </div>
+        `;
+
+        if(q.type === 'pilihan-ganda'){
+          content += `
+            <div class="space-y-2">
+              ${q.options.map((opt, optIdx) => `
+                <label class="flex items-start gap-3 cursor-pointer p-2 rounded-lg hover:bg-white/10 transition">
+                  <input type="radio" name="q${q.id}" data-question="${q.id}" data-correct="${opt.correct}" class="quiz-answer mt-1 w-4 h-4 min-w-4 accent-[#8de7d1]">
+                  <span class="text-sm text-slate-200 leading-5">${opt.text}</span>
+                </label>
+              `).join('')}
+            </div>
+            <div class="hidden quiz-feedback-${q.id} mt-3 p-3 rounded-lg bg-white/10 border border-white/20">
+              <p class="text-xs uppercase tracking-[0.15em] text-[#ffd166] font-bold mb-1">Penjelasan</p>
+              <p class="text-sm text-slate-200 leading-6 quiz-explanation-${q.id}"></p>
+            </div>
+          `;
+        } else if(q.type === 'menjodohkan'){
+          content += `
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-2">
+                ${q.pairs.map(p => `
+                  <div class="p-2 rounded-lg bg-white/10 border border-white/20">
+                    <p class="text-xs uppercase tracking-[0.1em] text-[#8de7d1] font-bold">${p.emotion || p.step}</p>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="space-y-2">
+                ${q.pairs.map(p => `
+                  <div class="flex items-center gap-2">
+                    <input type="text" class="matching-input w-full text-sm px-3 py-2 rounded-lg bg-white/[0.07] border border-white/10 text-white outline-none focus:border-[#8de7d1]" data-question="${q.id}" data-correct="${p.correct}" placeholder="Tulis jawaban...">
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="hidden quiz-feedback-${q.id} mt-3 p-3 rounded-lg bg-white/10 border border-white/20">
+              <p class="text-xs uppercase tracking-[0.15em] text-[#ffd166] font-bold mb-1">Penjelasan</p>
+              <p class="text-sm text-slate-200 leading-6 quiz-explanation-${q.id}"></p>
+            </div>
+          `;
+        } else if(q.type === 'menyeret'){
+          const shuffled = [...q.items].sort(() => Math.random() - 0.5);
+          content += `
+            <div class="space-y-2">
+              <p class="text-xs text-slate-400 italic mb-3">Seret item untuk mengurutkan (atau gunakan drag & drop)</p>
+              <div class="space-y-2" id="drag-zone-${q.id}">
+                ${shuffled.map((item, i) => `
+                  <div class="drag-item p-3 rounded-lg bg-white/10 border-2 border-white/20 cursor-move text-sm text-slate-200 transition hover:bg-white/15" draggable="true" data-order="${item.order}" data-question="${q.id}">
+                    ${item.text}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+            <div class="hidden quiz-feedback-${q.id} mt-3 p-3 rounded-lg bg-white/10 border border-white/20">
+              <p class="text-xs uppercase tracking-[0.15em] text-[#ffd166] font-bold mb-1">Penjelasan</p>
+              <p class="text-sm text-slate-200 leading-6 quiz-explanation-${q.id}"></p>
+            </div>
+          `;
+        } else if(q.type === 'isian'){
+          content += `
+            <div class="space-y-2">
+              <input type="text" id="isian-${q.id}" class="fill-blank w-full text-sm px-3 py-2 rounded-lg bg-white/[0.07] border border-white/10 text-white outline-none focus:border-[#8de7d1]" data-question="${q.id}" data-correct="${q.correctAnswer}" placeholder="Tulis jawaban...">
+              <p class="text-xs text-slate-400">${q.hint}</p>
+            </div>
+            <div class="hidden quiz-feedback-${q.id} mt-3 p-3 rounded-lg bg-white/10 border border-white/20">
+              <p class="text-xs uppercase tracking-[0.15em] text-[#ffd166] font-bold mb-1">Penjelasan</p>
+              <p class="text-sm text-slate-200 leading-6 quiz-explanation-${q.id}"></p>
+            </div>
+          `;
+        }
+
+        div.innerHTML = content;
+        container.appendChild(div);
+      });
+    }
+
+    function setupQuizListeners(){
+      // Pilihan ganda
+      document.querySelectorAll('.quiz-answer').forEach(input => {
+        input.addEventListener('change', (e) => {
+          const questionId = e.target.dataset.question;
+          const isCorrect = e.target.dataset.correct === 'true';
+          const question = quizQuestions.find(q => q.id === parseInt(questionId));
+          const selectedOption = question.options.find(opt => opt.text === e.target.nextElementSibling.textContent.trim());
+          
+          document.querySelector(`.quiz-feedback-${questionId}`).classList.remove('hidden');
+          document.querySelector(`.quiz-explanation-${questionId}`).textContent = selectedOption.explanation;
+          
+          e.target.parentElement.classList.add('opacity-70');
+          tone(isCorrect ? 659 : 330, .15);
+        });
+      });
+
+      // Menjodohkan
+      document.querySelectorAll('.matching-input').forEach(input => {
+        input.addEventListener('blur', (e) => {
+          const questionId = e.target.dataset.question;
+          const correct = e.target.dataset.correct.toLowerCase();
+          const answered = e.target.value.toLowerCase().trim();
+          if(answered && answered === correct){
+            e.target.classList.add('border-[#8de7d1]', 'border-2');
+            tone(659, .15);
+          }
+        });
+      });
+
+      // Menyeret (Drag and Drop)
+      setupDragDrop();
+    }
+
+    function setupDragDrop(){
+      const dragItems = document.querySelectorAll('.drag-item');
+      let draggedElement = null;
+
+      dragItems.forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedElement = item;
+          item.classList.add('opacity-50');
+        });
+
+        item.addEventListener('dragend', (e) => {
+          dragItems.forEach(i => i.classList.remove('opacity-50'));
+          draggedElement = null;
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if(draggedElement && draggedElement !== item){
+            item.parentNode.insertBefore(draggedElement, item);
+          }
+        });
+      });
+    }
+
+    function calculateQuizScore(){
+      let correct = 0;
+      let total = quizQuestions.length;
+      
+      quizQuestions.forEach(q => {
+        let isCorrect = false;
+        
+        if(q.type === 'pilihan-ganda'){
+          const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+          if(selected && selected.dataset.correct === 'true') isCorrect = true;
+        } else if(q.type === 'menjodohkan'){
+          const inputs = document.querySelectorAll(`input.matching-input[data-question="${q.id}"]`);
+          let allCorrect = true;
+          inputs.forEach(input => {
+            const correct = input.dataset.correct.toLowerCase();
+            const answered = input.value.toLowerCase().trim();
+            if(answered !== correct) allCorrect = false;
+          });
+          isCorrect = allCorrect;
+        } else if(q.type === 'menyeret'){
+          const items = document.querySelectorAll(`div.drag-item[data-question="${q.id}"]`);
+          let isCorrect = true;
+          let order = 1;
+          items.forEach(item => {
+            if(parseInt(item.dataset.order) !== order++) isCorrect = false;
+          });
+          correct;
+        } else if(q.type === 'isian'){
+          const input = document.getElementById(`isian-${q.id}`);
+          const answered = input.value.toLowerCase().trim();
+          if(answered === q.correctAnswer.toLowerCase()) isCorrect = true;
+        }
+        
+        if(isCorrect) correct++;
+      });
+      
+      return {correct, total, percentage: Math.round((correct/total)*100)};
+    }
+
+    function showQuizResult(){
+      const {correct, total, percentage} = calculateQuizScore();
+      const resultPanel = document.getElementById('quizResultPanel');
+      const scoreDiv = document.getElementById('quizScore');
+      const messageDiv = document.getElementById('quizMessage');
+      
+      scoreDiv.textContent = `${correct}/${total}`;
+      
+      let message = '';
+      if(percentage === 100) message = 'Sempurna! Kamu memahami emosi dengan sangat baik. 🌟';
+      else if(percentage >= 80) message = 'Hebat! Pengetahuanmu tentang emosi sudah sangat baik. 👏';
+      else if(percentage >= 60) message = 'Bagus! Kamu memiliki pemahaman yang cukup baik. Lanjutkan belajar! 📚';
+      else message = 'Jangan khawatir, pelajari kembali materinya dan coba lagi. Semangat! 💪';
+      
+      messageDiv.textContent = message;
+      resultPanel.classList.remove('hidden');
+      tone(523, .12);
+    }
+
+    const chips = document.querySelectorAll('.emotion-chip');
+    const selectedEmotion = document.getElementById('selectedEmotion');
+    const emotionMeaning = document.getElementById('emotionMeaning');
+    const emotionTip = document.getElementById('emotionTip');
+    const intensityText = document.getElementById('intensityText');
+    const intensityBar = document.getElementById('intensityBar');
+    const emotionIcon = document.getElementById('emotionIcon');
+
+    function tone(freq=440, duration=.12){
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration + 0.02);
+    }
+
+    chips.forEach((chip, index) => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        const emotion = chip.dataset.emotion;
+        const data = emotionData[emotion];
+        selectedEmotion.textContent = emotion;
+        emotionMeaning.textContent = data.meaning;
+        emotionTip.textContent = data.tip;
+        intensityText.textContent = data.intensity;
+        intensityBar.style.width = data.width;
+        emotionIcon.innerHTML = `<i data-lucide="${data.icon}" class="w-6 h-6"></i>`;
+        lucide.createIcons();
+        tone(380 + index * 45, .16);
+      });
+      chip.addEventListener('mouseenter', () => {
+        tone(330, 0.05);
+      });
+    });
+
+    document.getElementById('audioBtn').addEventListener('click', () => {
+      tone(523,.14);
+      setTimeout(()=>tone(659,.14),150);
+      setTimeout(()=>tone(784,.18),300);
+    });
+
+    document.getElementById('reflectionForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('studentName').value.trim();
+      const emotion = document.getElementById('emotionSelect').value;
+      const reflection = document.getElementById('reflectionText').value.trim();
+
+      if(!name || !emotion || !reflection){
+        tone(180,.16);
+        return;
+      }
+
+      document.getElementById('summaryEmpty').classList.add('hidden');
+      document.getElementById('summaryContent').classList.remove('hidden');
+      document.getElementById('summaryName').textContent = name;
+      document.getElementById('summaryEmotion').textContent = emotion;
+      document.getElementById('summaryReflection').textContent = reflection;
+      tone(523, .12);
+      tone(587, .12);
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      tone(300, .13);
+      showTab('simulasi');
+      chips.forEach(c => c.classList.remove('selected'));
+      selectedEmotion.textContent = 'Belum dipilih';
+      emotionMeaning.textContent = 'Pilih salah satu emosi pada roda untuk melihat penjelasan singkat.';
+      emotionTip.textContent = 'Saran sederhana akan muncul di sini.';
+      intensityText.textContent = '-';
+      intensityBar.style.width = '0%';
+      emotionIcon.innerHTML = '<i data-lucide="circle-help" class="w-6 h-6"></i>';
+      document.getElementById('studentName').value = '';
+      document.getElementById('emotionSelect').value = '';
+      document.getElementById('reflectionText').value = '';
+      document.getElementById('summaryContent').classList.add('hidden');
+      document.getElementById('summaryEmpty').classList.remove('hidden');
+      lucide.createIcons();
+    });
+
+    document.getElementById('backToSplashBtn').addEventListener('click', () => {
+      tone(300, .13);
+      const splashScreen = document.getElementById('splashScreen');
+      const appShell = document.querySelector('.app-shell');
+      const startBtn = document.getElementById('startBtn');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      
+      splashScreen.style.display = 'flex';
+      appShell.style.display = 'none';
+      splashScreen.style.animation = 'fadeIn 0.4s ease-out forwards';
+      
+      startBtn.classList.add('hidden');
+      loadingIndicator.classList.remove('hidden');
+      startBtn.textContent = 'Mulai Sekarang';
+    });
+
+    // Quiz initialization
+    renderQuiz();
+    setupQuizListeners();
+
+    let quizSubmitted = false;
+    const quizContainer = document.getElementById('quizContainer');
+    const originalContent = quizContainer.innerHTML;
+
+    const submitBtn = document.createElement('button');
+    submitBtn.id = 'quizSubmitBtn';
+    submitBtn.className = 'action-btn rounded-full px-6 py-3 font-semibold flex items-center gap-2 mx-auto mt-4 bg-[#8de7d1] text-[#08202d] hover:opacity-90 transition';
+    submitBtn.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i><span>Selesai & Lihat Hasil (10/10)</span>';
+    submitBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      let hasAnswered = true;
+      quizQuestions.forEach(q => {
+        if(q.type === 'pilihan-ganda'){
+          if(!document.querySelector(`input[name="q${q.id}"]:checked`)) hasAnswered = false;
+        } else if(q.type === 'menjodohkan'){
+          const inputs = document.querySelectorAll(`input.matching-input[data-question="${q.id}"]`);
+          inputs.forEach(input => {
+            if(!input.value.trim()) hasAnswered = false;
+          });
+        } else if(q.type === 'menyeret'){
+          // Drag and drop is optional
+        } else if(q.type === 'isian'){
+          const input = document.getElementById(`isian-${q.id}`);
+          if(!input.value.trim()) hasAnswered = false;
+        }
+      });
+      if(!hasAnswered){
+        tone(180, .16);
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-[#ff8a7a] text-[#08202d] px-5 py-3 rounded-full font-semibold text-sm z-50 animate-bounce';
+        errorMsg.textContent = '⚠ Mohon jawab semua soal terlebih dahulu.';
+        document.body.appendChild(errorMsg);
+        setTimeout(() => errorMsg.remove(), 3000);
+        return;
+      }
+      submitBtn.style.display = 'none';
+      showQuizResult();
+      tone(523, .14);
+      setTimeout(() => tone(659, .14), 150);
+    });
+    quizContainer.parentElement.insertBefore(submitBtn, quizContainer.nextSibling);
+
+    document.getElementById('quizResetBtn').addEventListener('click', () => {
+      tone(300, .13);
+      document.getElementById('quizResultPanel').classList.add('hidden');
+      submitBtn.style.display = 'flex';
+      renderQuiz();
+      setupQuizListeners();
+    });
+
+    // Game initialization
+    const gameData = [
+      {emotion:"Bahagia", icon:"smile", color:"#f87777"},
+      {emotion:"Sayang", icon:"heart", color:"#7cc7ff"},
+      {emotion:"Tenang", icon:"leaf", color:"#8de7d1"},
+      {emotion:"Sedih", icon:"cloud-rain", color:"#bca8ff"},
+      {emotion:"Takut", icon:"shield-alert", color:"#ffb35c"},
+      {emotion:"Marah", icon:"flame", color:"#ff8a7a"}
+    ];
+
+    let gameMatches = 0;
+    let gameFlipped = [];
+    let gameDisabled = false;
+
+    function initGame(){
+      const board = document.getElementById('gameBoard');
+      board.innerHTML = '';
+      gameMatches = 0;
+      gameFlipped = [];
+      gameDisabled = false;
+      
+      const gameCards = [...gameData, ...gameData].sort(() => Math.random() - 0.5);
+      gameCards.forEach((card, idx) => {
+        const cardEl = document.createElement('div');
+        cardEl.className = 'game-card relative w-full h-20 cursor-pointer rounded-2xl transition-all duration-300';
+        cardEl.innerHTML = `
+          <div class="card-inner w-full h-full relative" style="transform-style: preserve-3d; transition: transform 0.6s;">
+            <div class="card-front absolute inset-0 rounded-2xl bg-gradient-to-br from-white/15 to-white/5 border border-white/20 flex items-center justify-center" style="backface-visibility: hidden;">
+              <div class="text-2xl">?</div>
+            </div>
+            <div class="card-back absolute inset-0 rounded-2xl border border-white/20 flex items-center justify-center" style="backface-visibility: hidden; transform: rotateY(180deg); background: ${card.color}20;">
+              <i data-lucide="${card.icon}" class="w-8 h-8" style="color: ${card.color};"></i>
+            </div>
+          </div>
+        `;
+        cardEl.dataset.emotion = card.emotion;
+        cardEl.dataset.index = idx;
+        cardEl.addEventListener('click', () => flipCard(cardEl));
+        board.appendChild(cardEl);
+      });
+      lucide.createIcons();
+      updateGameScore();
+    }
+
+    function flipCard(cardEl){
+      if(gameDisabled || gameFlipped.includes(cardEl) || cardEl.classList.contains('matched')) return;
+      
+      const inner = cardEl.querySelector('.card-inner');
+      inner.style.transform = 'rotateY(180deg)';
+      gameFlipped.push(cardEl);
+      tone(523, .1);
+      tone(349, .08);
+      
+      if(gameFlipped.length === 2){
+        gameDisabled = true;
+        setTimeout(() => checkMatch(), 600);
+      }
+    }
+
+    function checkMatch(){
+      const [card1, card2] = gameFlipped;
+      const match = card1.dataset.emotion === card2.dataset.emotion;
+      
+      if(match){
+        gameMatches++;
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+        card1.style.pointerEvents = 'none';
+        card2.style.pointerEvents = 'none';
+        tone(659, .15);
+        updateGameScore();
+        
+        if(gameMatches === gameData.length){
+          setTimeout(() => {
+            tone(784, .2);
+            setTimeout(() => tone(880, .2), 150);
+          }, 500);
+        }
+      } else {
+        card1.querySelector('.card-inner').style.transform = 'rotateY(0deg)';
+        card2.querySelector('.card-inner').style.transform = 'rotateY(0deg)';
+        tone(330, .12);
+      }
+      
+      gameFlipped = [];
+      gameDisabled = false;
+    }
+
+    function updateGameScore(){
+      document.getElementById('gameScore').textContent = `${gameMatches}/${gameData.length}`;
+    }
+
+    document.getElementById('gameResetBtn').addEventListener('click', () => {
+      tone(300, .13);
+      initGame();
+    });
+
+    initGame();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a111645a23cfa553',t:'MTc4MjM2MzQ1Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body></html>
